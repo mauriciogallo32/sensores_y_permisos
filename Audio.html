@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Audio</title>
+</head>
+<body>
+  <h1>Graba y reproduce tu audio</h1>
+
+  <button onclick="toggleRecording()">Grabar / Detener</button>
+  <button onclick="playRecording()">Reproducir</button>
+
+  <script>
+    let chunks = [];
+    let mediaRecorder;
+    let isRecording = false;
+
+    function toggleRecording() {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    }
+
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start();
+
+          mediaRecorder.addEventListener('dataavailable', function(e) {
+            chunks.push(e.data);
+          });
+
+          isRecording = true;
+          console.log('Grabacion iniciada.');
+        })
+        .catch(function(err) {
+          console.log('Error al acceder al microfono: ' + err);
+        });
+    }
+
+    function stopRecording() {
+      mediaRecorder.stop();
+      isRecording = false;
+      console.log('Grabacion detenida.');
+    }
+
+    function playRecording() {
+      if (chunks.length === 0) {
+        console.log('No hay grabacion para reproducir.');
+        return;
+      }
+
+      let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+      let audioElement = document.createElement('audio');
+      audioElement.src = URL.createObjectURL(blob);
+      audioElement.controls = true;
+      document.body.appendChild(audioElement);
+    }
+  </script>
+</body>
+</html>

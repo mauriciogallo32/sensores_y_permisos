@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Geolocalizacion y Camara</title>
+</head>
+<body>
+  <h1>Geolocalizacion y Camara</h1>
+
+  <div id="ubicacion"></div>
+  <div id="camara"></div>
+
+  <script>
+    if ("geolocation" in navigator) {
+      obtenerUbicacion();
+    } else {
+      mostrarError("El navegador no soporta la API de Geolocalizacion");
+    }
+
+    if ("mediaDevices" in navigator && "getUserMedia" in navigator.mediaDevices) {
+      obtenerCamara();
+    } else {
+      mostrarError("El navegador no soporta la API de Medios o la funcion getUserMedia");
+    }
+
+    function obtenerUbicacion() {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          var latitude = position.coords.latitude;
+          var longitude = position.coords.longitude;
+          mostrarUbicacion(latitude, longitude);
+        },
+        function(error) {
+          mostrarError("No se pudo obtener la ubicacion: " + error.message);
+        }
+      );
+    }
+
+    function obtenerCamara() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          mostrarVideo(stream);
+        })
+        .catch(function(error) {
+          mostrarError("No se pudo acceder a la cámara: " + error.message);
+        });
+    }
+
+    function mostrarUbicacion(latitude, longitude) {
+      var ubicacionElement = document.getElementById("ubicacion");
+      ubicacionElement.innerHTML = "Ubicación obtenida: " + latitude + ", " + longitude;
+    }
+
+    function mostrarVideo(stream) {
+      var videoElement = document.createElement("video");
+      videoElement.srcObject = stream;
+      videoElement.play();
+
+      var camaraElement = document.getElementById("camara");
+      camaraElement.appendChild(videoElement);
+    }
+
+    function mostrarError(message) {
+      console.error(message);
+    }
+  </script>
+</body>
+</html>
